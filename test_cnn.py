@@ -127,15 +127,27 @@ if __name__ == '__main__':
     print(report)
 
     cm = confusion_matrix(y_true, y_pred,list(range(4 if args.mode == '4Q' else 2)))
-    fig = plt.figure(figsize=(10,10),dpi=80)
+    if args.mode =='Ar':
+        cm = pd.DataFrame(cm,index=['Arousal +', 'Arousal -']).rename(columns={0: "Arousal +", 1: "Arousal -"})
+    if args.mode =='Va':
+        cm = pd.DataFrame(cm,index=['Valence +', 'Valence -']).rename(columns={0: "Valence +", 1: "Valence -"})            
+    if args.mode =='4Q':
+        cm = pd.DataFrame(cm,index=['Arousal +\nValence  +',
+                                    'Arousal +\nValence  -',
+                                    'Arousal -\nValence  -',
+                                    'Arousal -\nValence  +',]).rename(columns={0: "Arousal +\nValence  +", 
+                                                                               1: "Arousal +\nValence  -",
+                                                                               2: "Arousal -\nValence  -",
+                                                                               3: "Arousal -\nValence  +",}) 
+    fig = plt.figure(figsize=(10,10),dpi=120)
     ax = fig.add_subplot(2,1,1)
-    sns.heatmap(cm, annot=True, ax = ax, cmap='Blues', fmt="d")
+    sns.heatmap(cm, annot=True, ax = ax, cmap='Blues', fmt="d",annot_kws={'size':16})
 
     ax.set_title('{}-Audio_{}_{}_fold{} Confusion Matrix'.format(args.CV,args.mode,args.model1,args.fold))
 
     ax.set_xlabel('Predicted Labels')
     ax.set_ylabel('True Labels')
-    fig.savefig('png/{}-Audio_{}_{}_fold{}.png'.format(args.CV,args.mode,args.model1,args.fold))
+    fig.savefig('png/{}-Audio_{}_{}_fold{}.png'.format(args.CV,args.mode,args.model1,args.fold),bbox_inches='tight')
 
     f = open('res/{}{}.txt'.format(args.path.split('/')[-2][:-1],args.fold),'w+')
     f.write(report)
